@@ -18,17 +18,25 @@ db.init_app(app)
 @app.route('/clear')
 def clear_session():
     session['page_views'] = 0
-    return {'message': '200: Successfully cleared session data.'}, 200
+    return make_response({'message': '200: Successfully cleared session data.'}, 200)
 
 @app.route('/articles')
 def index_articles():
+    article_list = [article.to_dict() for article in Article.query.all()]
 
-    pass
+    return make_response(article_list, 200)
+    
 
 @app.route('/articles/<int:id>')
 def show_article(id):
-
-    pass
+    art = Article.query.filter_by(id=id).first()
+    session['page_views'] = session.get('page_views') or 0
+    session['page_views'] = session['page_views'] + 1
+    print(session['page_views'])
+    if session['page_views'] < 4:
+        return make_response(art.to_dict(), 200)
+    else:
+        return make_response({'message': 'Maximum pageview limit reached'}, 401)
 
 if __name__ == '__main__':
-    app.run(port=5555)
+    app.run(port=5555, debug=True)
